@@ -10,6 +10,8 @@ import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.RememberMeAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.web.WebAttributes;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
@@ -18,7 +20,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.view.RedirectView;
 
 import com.spring.edu.model.UserModel;
 
@@ -47,14 +48,30 @@ public class HomeController {
 
 		model.addAttribute("serverTime", formattedDate);
 
-		getUserSession(request, model);
+		if (getUserSession(request, model) != null) {
+			model.addAttribute("message", "세션값을 가지고 있습니다.");			
+			if (isRememberMeAuthenticated(request)) {
+
+				System.out.println(isRememberMeAuthenticated(request));
+				model.addAttribute("authType", "토큰 로그인 중...");
+				System.out.println("자동로그인::" + model.toString());
+			} else {
+				System.out.println(isRememberMeAuthenticated(request));
+				model.addAttribute("authType", "입력받아 로그인 중...");
+				System.out.println("입력 로그인:" + model.toString());
+			}
+
+		}else{
+			model.addAttribute("message", "세션값이 존제하지 않습니다.");		
+			
+		}
 
 		return "home";
 	}
 
 	// 1. 로그인 페이지 요청 시 작업내용
 	// 2. ( method = RequestMethod.GET) 부분은 GET방식 요청으로만 접근 할 수 있다는 뜻
-	 @RequestMapping(value = "/login", method = RequestMethod.GET)
+	@RequestMapping(value = "/login", method = RequestMethod.GET)
 	public ModelAndView loginPage(HttpServletRequest request, Model model) {
 
 		HttpSession session = request.getSession(false);
@@ -62,6 +79,7 @@ public class HomeController {
 		if (session != null) {
 
 			Object obj = session.getAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
+			System.out.println("obj :: "+obj);
 
 			if (obj != null && obj instanceof AuthenticationException) {
 				AuthenticationException excp = (AuthenticationException) obj;
@@ -70,6 +88,46 @@ public class HomeController {
 		}
 		return new ModelAndView("login");
 	}
+
+	private boolean isRememberMeAuthenticated(HttpServletRequest request) {
+		HttpSession session = request.getSession(false);
+		if (session != null) {
+			Object obj = session.getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
+			System.out.println("obj :: "+obj);
+			System.out.println("authentication:: "+((SecurityContextImpl)obj).getAuthentication());
+			if (obj != null && obj instanceof SecurityContextImpl) {
+				Object auth = ((SecurityContextImpl) obj).getAuthentication();
+				if (auth != null && auth instanceof Authentication) {
+					return RememberMeAuthenticationToken.class.isAssignableFrom(auth.getClass());
+				}
+			}
+		}
+		return false;
+		/*// Check authentication exists
+	    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+	    System.out.println("auth "+authentication.isAuthenticated());
+	    if (authentication == null) {
+	        return false;
+	    }
+	    System.out.println("rememberAuth::"+ RememberMeAuthenticationToken.class.isAssignableFrom(authentication.getClass()));
+	    return RememberMeAuthenticationToken.class.isAssignableFrom(authentication.getClass());*/
+	}
+	
+	/*
+	private boolean isRememberMeAuthenticated(){
+		
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if(authentication == null){
+			return false;
+		}
+		
+		//return true;
+		return RememberMeAuthenticationToken.class.isAssignableFrom(authentication.getClass());
+		
+	}*/
+	
+	
+	
 
 	/*
 	 * // 1. 로그인페이지 요청 시 작업내용 // 2. ( method = RequestMethod.GET ) 부분은 GET방식
@@ -166,39 +224,37 @@ public class HomeController {
 	 */
 
 	// UserModel의 세션값 가져오기
-	private UserModel getUserSession(HttpServletRequest request, Model model){
-        HttpSession session = request.getSession(false);
-        if(session != null){
-            Object obj = session.getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
-            if(obj != null && obj instanceof SecurityContextImpl){
-                Object user = ((SecurityContextImpl) obj).getAuthentication().getPrincipal();
-                if(user != null && user instanceof UserModel){
-                    /*if(model != null){
-                        model.addAttribute("USER_SESSION", user);
-                    }*/
-                    if(session.getAttribute("USER_SESSION") == null){
-                        session.setAttribute("USER_SESSION", (UserModel) user);
-                    }
-                    return (UserModel) user;
-                }
-            }
-        }
-        return null;
-    }
-
-	// 페이지 강제 이동을 위한 메소드
-	private ModelAndView redirectView(HttpServletRequest request, String url) {
-
-		RedirectView rv = new RedirectView();
-		ModelAndView mav = new ModelAndView(rv);
-		rv.setUrl(request.getContextPath() + url);
-
-		// GET 방식으로 된 파라미터들을 모두 없앰
-		rv.setExposePathVariables(false);
-		// Model에 등록 된 값들을 모두 없앰
-		rv.setExposeModelAttributes(false);
-
-		return mav;
+	private UserModel getUserSession(HttpServletRequest request, Model model) {
+		HttpSession session = request.getSession(false);
+		if (session != null) {
+			Object obj = session.getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
+			if (obj != null && obj instanceof SecurityContextImpl) {
+				Object user = ((SecurityContextImpl) obj).getAuthentication().getPrincipal();
+				if (user != null && user instanceof UserModel) {
+					/*
+					 * if(model != null){ model.addAttribute("USER_SESSION",
+					 * user); }
+					 */
+					if (session.getAttribute("USER_SESSION") == null) {
+						session.setAttribute("USER_SESSION", (UserModel) user);
+					}
+					return (UserModel) user;
+				}
+			}
+		}
+		return null;
 	}
+	/*
+	 * // 페이지 강제 이동을 위한 메소드 private ModelAndView redirectView(HttpServletRequest
+	 * request, String url) {
+	 * 
+	 * RedirectView rv = new RedirectView(); ModelAndView mav = new
+	 * ModelAndView(rv); rv.setUrl(request.getContextPath() + url);
+	 * 
+	 * // GET 방식으로 된 파라미터들을 모두 없앰 rv.setExposePathVariables(false); // Model에 등록
+	 * 된 값들을 모두 없앰 rv.setExposeModelAttributes(false);
+	 * 
+	 * return mav; }
+	 */
 
 }

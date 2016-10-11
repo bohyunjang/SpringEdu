@@ -7,6 +7,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+
+
+@SuppressWarnings("serial")
 @Component
 public class UserModel implements UserDetails {
 

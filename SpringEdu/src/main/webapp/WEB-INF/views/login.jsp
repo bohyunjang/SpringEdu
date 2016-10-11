@@ -21,11 +21,11 @@
     <input type="email" name="login_email" id="login_email" autofocus maxlength="128">
     <label for="login_password">Password</label>
     <input type="password" name="login_password" id="login_password" maxlength="64">
+    <button type="submit">로그인</button>
     <label>
         <input type="checkbox" name="login_rememberme" id="login_rememberme">
          자동로그인
     </label>
-    <button type="submit">로그인</button>    
 </form>
 </body>
 </html>
