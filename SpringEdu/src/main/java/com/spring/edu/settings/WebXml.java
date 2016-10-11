@@ -1,4 +1,4 @@
-package com.spring.edu.settings;
+/*package com.spring.edu.settings;
 
 import java.nio.file.DirectoryStream.Filter;
 
@@ -49,3 +49,4 @@ public class WebXml implements WebApplicationInitializer{
 	}
 	
 }
+*/
