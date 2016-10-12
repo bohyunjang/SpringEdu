@@ -11,12 +11,15 @@ import org.springframework.stereotype.Component;
 
 @SuppressWarnings("serial")
 @Component
-public class UserModel implements UserDetails {
+public class UserModel implements UserDetails, GrantedAuthority{
 
 	String userName;
 	String password;
 	String nickName;
 	String authority;
+	boolean enabled;
+	String regdate;
+	String str_Regdate;
 
 	Collection<? extends GrantedAuthority> authorities;
 
@@ -32,7 +35,7 @@ public class UserModel implements UserDetails {
 		this.password = password;
 	}
 
-	public void setAuthority(List<? extends GrantedAuthority> authorities) {
+	public void setAuthorities(List<? extends GrantedAuthority> authorities) {
 		this.authorities = authorities;
 	}
 
@@ -84,5 +87,33 @@ public class UserModel implements UserDetails {
 
 	public void setNickName(String nickName) {
 		this.nickName = nickName;
+	}
+
+	public String getAuthority() {
+		return authority;
+	}
+
+	public void setAuthority(String authority) {
+		this.authority = authority;
+	}
+
+	public String getRegdate() {
+		return regdate;
+	}
+
+	public void setRegdate(String regdate) {
+		this.regdate = regdate;
+	}
+
+	public String getStr_Regdate() {
+		return str_Regdate;
+	}
+
+	public void setStr_Regdate(String str_Regdate) {
+		this.str_Regdate = str_Regdate;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
 	}
 }

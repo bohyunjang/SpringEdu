@@ -2,5 +2,22 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 						"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="sql">
-	
-</mapper>						
+	<resultMap type="com.spring.edu.model" id="userMap" >
+		<id property="userName" column="username"/>
+		<id property="password" column="password"/>
+		<id property="nickName" column="nickname"/>
+	</resultMap>
+
+	<select id="selectUserByUserName" resultType="user"
+		parameterType="String">
+		SELECT *
+		FROM user
+		WHERE userName = #{userName}
+	</select>
+
+	<insert id="insertUser" parameterType="user">
+		INSERT INTO user(member_id,userName, password, nickName)
+		VALUES (0,#{userName}, #{password}, #{nickName})
+	</insert>
+
+</mapper>

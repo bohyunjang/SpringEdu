@@ -19,11 +19,11 @@
 <c:choose>
     <c:when test="${empty USER_SESSION}">
         <a href="${pageContext.request.contextPath}/login" target="_self">로그인 하기</a>
+        <a href="${pageContext.request.contextPath}/register" target="_self">회원가입하기</a>
     </c:when>
     <c:otherwise>
         <p>${USER_SESSION.nickName}님 환경합니다.</p>
         <p>${authType}</p>
-        <p>${message}</p>
         <form action="${pageContext.request.contextPath}/logout" method="post" target="_self">
             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
             <button type="submit">로그아웃</button>

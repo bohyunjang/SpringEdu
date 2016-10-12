@@ -15,6 +15,11 @@
     <p>${LOGIN_EXCEPTION}</p>
 </c:if>
  
+ <!-- 회원가입 추가 -->
+ <div>
+ 	<a href="${pageContext.request.contextPath}/register" target="_self">회원가입하기</a>
+ </div>
+ 
 <form action="${pageContext.request.contextPath}/login-request" method="post" target="_self">
     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
     <label for="login_email">Email</label>
@@ -26,7 +31,7 @@
         <input type="checkbox" name="login_rememberme" id="login_rememberme">
          자동로그인
     </label>
-</form>
+ </form>
 </body>
 </html>
 

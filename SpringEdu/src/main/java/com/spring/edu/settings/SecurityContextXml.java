@@ -53,6 +53,8 @@ public class SecurityContextXml extends WebSecurityConfigurerAdapter {
 		http
 			.authorizeRequests()
 				.antMatchers("/").authenticated()
+				.antMatchers("/login**").anonymous()
+				.antMatchers("/register**").anonymous()
 				.and()
 			.formLogin()
 				.loginPage("/login").permitAll(false)

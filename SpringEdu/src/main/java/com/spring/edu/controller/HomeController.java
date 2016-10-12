@@ -1,26 +1,35 @@
 package com.spring.edu.controller;
 
+import java.beans.Encoder;
+import java.io.Reader;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
 
 import javax.naming.AuthenticationException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.RememberMeAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextImpl;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.WebAttributes;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.RedirectView;
 
+import com.spring.edu.dao.UserDao;
 import com.spring.edu.model.UserModel;
 
 /**
@@ -30,6 +39,13 @@ import com.spring.edu.model.UserModel;
 public class HomeController {
 
 	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
+	
+	@Autowired
+	UserDao userDao;
+	
+	@Autowired
+	PasswordEncoder encoder;
+	
 
 	/**
 	 * Simply selects the home view to render by returning its name.
@@ -49,7 +65,7 @@ public class HomeController {
 		model.addAttribute("serverTime", formattedDate);
 
 		if (getUserSession(request, model) != null) {
-			model.addAttribute("message", "세션값을 가지고 있습니다.");			
+			model.addAttribute("message", "세션값을 가지고 있습니다.");
 			if (isRememberMeAuthenticated(request)) {
 
 				System.out.println(isRememberMeAuthenticated(request));
@@ -61,9 +77,9 @@ public class HomeController {
 				System.out.println("입력 로그인:" + model.toString());
 			}
 
-		}else{
-			model.addAttribute("message", "세션값이 존제하지 않습니다.");		
-			
+		} else {
+			model.addAttribute("message", "세션값이 존제하지 않습니다.");
+
 		}
 
 		return "home";
@@ -75,11 +91,12 @@ public class HomeController {
 	public ModelAndView loginPage(HttpServletRequest request, Model model) {
 
 		HttpSession session = request.getSession(false);
+		System.out.println("loginPage Controller");
 
 		if (session != null) {
 
 			Object obj = session.getAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
-			System.out.println("obj :: "+obj);
+			System.out.println("obj :: " + obj);
 
 			if (obj != null && obj instanceof AuthenticationException) {
 				AuthenticationException excp = (AuthenticationException) obj;
@@ -89,12 +106,82 @@ public class HomeController {
 		return new ModelAndView("login");
 	}
 
+	// 회원가입 페이지 이동
+	@RequestMapping(value = "/register", method = RequestMethod.GET)
+	public ModelAndView registerPage(HttpServletRequest request, Model model) {
+		System.out.println("registerPage Controller");
+		return new ModelAndView("register");
+	}
+
+	// 회원가입 데이터 입력
+	@RequestMapping(value = "/register/submit", method = RequestMethod.POST)
+	public ModelAndView registerSubmit(HttpServletRequest request, Model model,
+			@RequestParam(name = "userName") String userName, @RequestParam(name = "password") String password,
+			@RequestParam(name = "password_confirm") String password_confirm,
+			@RequestParam(name = "nickName") String nickName) {
+
+		
+		HttpSession session = request.getSession(false);
+		if (session != null) {
+			if (session.getAttribute("REGISTER_EXEPTION") != null) {
+				session.removeAttribute("REGISTER_EXCEPTION");
+			} else if (session.getAttribute("REGISTER_NICKNAME") != null) {
+				session.removeAttribute("REGISTER_NICKNAME");
+			} else if (session.getAttribute("REGISTER_USERNAME")!=null) {
+				session.removeAttribute("REGISTER_USERNAME");
+			}
+		}
+		try{
+			Assert.hasLength(userName, "아이디를 입력해주세요!!");
+			Assert.hasLength(password,"비밀번호를 입력해주세요!!");
+			Assert.hasLength(password_confirm,"비밀번호를 확인해주세요!!");
+			Assert.hasLength(nickName, "이름을 입력해 주세요!!");
+			Assert.isTrue(password.equals(password_confirm),"비밀번호가 일치하지 않습니다!!");
+			
+			UserModel userModel = new UserModel();
+			userModel.setUserName(userName);
+			userModel.setPassword(encoder.encode(password));
+			userModel.setNickName(nickName);
+			
+			Assert.isTrue(userDao.insertUser(userModel)>0,"회원가입에 실패하였습니다.");
+			
+			
+		}catch (IllegalArgumentException iae) {
+			// TODO: handle exception
+			if(session == null){
+				session = request.getSession(true);
+			}
+			
+			session.setAttribute("REGISTER_EXCEPTION", iae.getMessage());
+			session.setAttribute("REGISTER_NICKNAME", nickName);
+			session.setAttribute("REGISTER_USERNAME", userName);
+			
+			RedirectView rv = new RedirectView("/edu/register");
+			rv.setExposeModelAttributes(false);
+
+			return new ModelAndView(rv);
+			
+		}
+		
+		System.out.println();
+		System.out.println("registerSubmit Controller");
+		System.out.println("username:: " + userName);
+		System.out.println("password:: " + password);
+		System.out.println("password_confrim:: " + password_confirm);
+		System.out.println("nickname:: " + nickName);
+		
+		RedirectView rv = new RedirectView("/edu/login");
+		rv.setExposeModelAttributes(false);
+
+		return new ModelAndView(rv);
+	}
+
 	private boolean isRememberMeAuthenticated(HttpServletRequest request) {
 		HttpSession session = request.getSession(false);
 		if (session != null) {
 			Object obj = session.getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
-			System.out.println("obj :: "+obj);
-			System.out.println("authentication:: "+((SecurityContextImpl)obj).getAuthentication());
+			System.out.println("obj :: " + obj);
+			System.out.println("authentication:: " + ((SecurityContextImpl) obj).getAuthentication());
 			if (obj != null && obj instanceof SecurityContextImpl) {
 				Object auth = ((SecurityContextImpl) obj).getAuthentication();
 				if (auth != null && auth instanceof Authentication) {
@@ -103,31 +190,7 @@ public class HomeController {
 			}
 		}
 		return false;
-		/*// Check authentication exists
-	    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-	    System.out.println("auth "+authentication.isAuthenticated());
-	    if (authentication == null) {
-	        return false;
-	    }
-	    System.out.println("rememberAuth::"+ RememberMeAuthenticationToken.class.isAssignableFrom(authentication.getClass()));
-	    return RememberMeAuthenticationToken.class.isAssignableFrom(authentication.getClass());*/
 	}
-	
-	/*
-	private boolean isRememberMeAuthenticated(){
-		
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		if(authentication == null){
-			return false;
-		}
-		
-		//return true;
-		return RememberMeAuthenticationToken.class.isAssignableFrom(authentication.getClass());
-		
-	}*/
-	
-	
-	
 
 	/*
 	 * // 1. 로그인페이지 요청 시 작업내용 // 2. ( method = RequestMethod.GET ) 부분은 GET방식

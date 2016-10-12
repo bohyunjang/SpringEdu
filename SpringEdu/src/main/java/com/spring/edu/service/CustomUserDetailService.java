@@ -8,19 +8,24 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import com.spring.edu.dao.UserDao;
 import com.spring.edu.model.UserModel;
 
 @Component
-public class CustomUsserDetailService implements UserDetailsService {
+public class CustomUserDetailService implements UserDetailsService {
 
 	@Autowired
 	PasswordEncoder encoder;
+	
+	@Autowired
+	UserDao userDao;
 	
 	@Override
 	public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
 		// TODO Auto-generated method stub
 
-		UserModel user = new UserModel();
+		UserModel userModel = userDao.selectUserByUserName(userName);
+		/*UserModel user = new UserModel();
 		
 		final String testUserName = "test@test.com";
 		final String testPassword = "test";
@@ -32,14 +37,17 @@ public class CustomUsserDetailService implements UserDetailsService {
 			user.setPassword(encoder.encode(testPassword));
 			user.setNickName(testNickName);
 			user.setAuthority(AuthorityUtils.createAuthorityList("ROLE_USER"));
-			
+		*/
+		
+		if(userModel !=null){
+			userModel.setAuthorities(AuthorityUtils
+					.createAuthorityList(userModel.getAuthority()));
+		
 		}else{
 			
 			throw new UsernameNotFoundException(userName);
 		}
-		return user;
+		return userModel;
 	}
-
-	
 
 }

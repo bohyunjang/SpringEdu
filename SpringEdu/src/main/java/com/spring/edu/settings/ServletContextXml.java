@@ -82,7 +82,7 @@ public class ServletContextXml extends WebMvcConfigurerAdapter
 		DataSource dataSource = new DataSource();
 		
 		dataSource.setDriverClassName("com.mysql.jdbc.Driver");
-		dataSource.setUrl("jdbc:mysql://localhost:3306/edu"
+		dataSource.setUrl("jdbc:mysql://localhost:3306/springedu"
 				+ "?useSSl=false&characterEncoding=UTF-8");
 		dataSource.setUsername("root");
 		dataSource.setPassword("test");
