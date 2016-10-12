@@ -1,5 +1,6 @@
 package com.spring.edu.settings;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -75,6 +76,7 @@ public class SecurityContextXml extends WebSecurityConfigurerAdapter {
 		// 현제 데이터 베이스를 이용하는 것이 아니라 메모리를 이용
 		InMemoryTokenRepositoryImpl repository = new InMemoryTokenRepositoryImpl();
 		System.out.println("token:: "+repository);
+		
 		return repository;
 	}
 }
