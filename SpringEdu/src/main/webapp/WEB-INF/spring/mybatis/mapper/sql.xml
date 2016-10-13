@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 						"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="sql">
-	<resultMap type="com.spring.edu.model" id="userMap" >
+	<resultMap type="com.spring.edu.model.UserModel" id="userMap" >
 		<id property="userName" column="username"/>
 		<id property="password" column="password"/>
 		<id property="nickName" column="nickname"/>
@@ -16,8 +16,8 @@
 	</select>
 
 	<insert id="insertUser" parameterType="user">
-		INSERT INTO user(member_id,userName, password, nickName)
-		VALUES (0,#{userName}, #{password}, #{nickName})
+		INSERT INTO user(userName, password, nickName, authority)
+		VALUES (#{userName}, #{password}, #{nickName},"ROLE_USER")
 	</insert>
 
 </mapper>

@@ -21,7 +21,8 @@ public class CustomUserDetailService implements UserDetailsService {
 	UserDao userDao;
 	
 	@Override
-	public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
+	public UserDetails loadUserByUsername(String userName) 
+			throws UsernameNotFoundException {
 		// TODO Auto-generated method stub
 
 		UserModel userModel = userDao.selectUserByUserName(userName);
@@ -40,11 +41,12 @@ public class CustomUserDetailService implements UserDetailsService {
 		*/
 		
 		if(userModel !=null){
+			System.out.println("authority test!!!");
+			System.out.println("authority"+userModel.getAuthority());
 			userModel.setAuthorities(AuthorityUtils
 					.createAuthorityList(userModel.getAuthority()));
-		
 		}else{
-			
+			System.out.println("not found authority");
 			throw new UsernameNotFoundException(userName);
 		}
 		return userModel;

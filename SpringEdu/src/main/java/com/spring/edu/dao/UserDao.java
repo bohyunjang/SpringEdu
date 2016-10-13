@@ -16,11 +16,7 @@ public class UserDao {
 		
 		System.out.println("UserDAO.. selectUserByUserName");
 		System.out.println("userName:: "+ userName);
-		
-		int temp = sqlSession.selectOne("selectUserByUsername", userName);
-		
-		System.out.println("sql::" +temp);
-		
+
 		return sqlSession.selectOne("selectUserByUserName",userName); 
 	}
 	
